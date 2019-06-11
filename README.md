@@ -4,7 +4,7 @@ Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for i
 
 It is ideal for adding extremely light-weight application environment injection when building a .WAR to deploy on application servers.
 
-## 1) Prepare the pom.xml
+## Prepare the pom.xml
 
 To use Cotton and Hura Web, simply add the respective dependencies it to your Maven POM:
 
@@ -42,7 +42,7 @@ We are building an application here that is deployable on an external applicatio
 </build>
 ````
 
-## 2) Set up the Application's Initializer
+## Set up the Application's Initializer
 
 Hura Web supplies the interface _**HuraWebApplicationInitializer**_ which can be used to start up Hura Web applications by defining the web environment in it. For Hura, this interface is a specialized _**Blueprint**_, so the web environment can be defined by adding methods annotated with _@Define_ to it.
 
@@ -59,7 +59,7 @@ public SingletonAllocation defineCottonServlet() {
 
 We have also mapped the servlet to _"/*"_, which will cause all requests of our application to be given to our _**CottonServlet**_ for handling.
 
-## 3) Create a View
+## Create a View
 
 This chapter is just a deployment demonstration, so we do not care about the content of the view that much; it can be anything that is a Vaadin **_Component_** implementation.
 
