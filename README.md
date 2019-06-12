@@ -4,7 +4,7 @@ This repository supplies a set of tutorials to present the main features of [Cot
 
 The tutorials are divided into logical chapters with multiple tutorials each. Each tutorial has its own branch, so its code can be checked out individually.
 
-The README.md of at the root of each branch will provide a step-by-step tutorial through each lesson.
+The **README.md** of at the root of each branch will provide a step-by-step tutorial through each lesson. Note that from chapter 2 on, a Hura WebLaunch Setup (see chapter 1.b) from the master branch which is stripped down to be launched from an IDE is used for all the tutorials.
 
 ## Chapter 1: Cotton Flow Setups
 
