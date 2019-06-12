@@ -1,4 +1,4 @@
-package com.mantledillusion.vaadin.cotton.demo;
+package com.mantledillusion.vaadin.cotton.demo.app;
 
 import com.mantledillusion.injection.hura.weblaunch.HuraWeblaunchApplication;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;

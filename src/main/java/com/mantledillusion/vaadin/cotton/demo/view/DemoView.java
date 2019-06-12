@@ -1,4 +1,4 @@
-package com.mantledillusion.vaadin.cotton.demo;
+package com.mantledillusion.vaadin.cotton.demo.view;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
