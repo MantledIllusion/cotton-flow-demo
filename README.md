@@ -51,3 +51,11 @@ Vaadin maps URLs to views with **_Router_**, where all visitable views are regis
 When using external application servers, Servlet-API mechanisms will help Vaadin register components annotated with _@Route_ automatically.
 
 When using an embedded one, you can delegate that job to Cotton.
+
+### 2.b [Defining Application-Level (Singleton) Beans](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/define_app_level_beans)
+
+Hura is responsible for injecting every kind of bean from the **_CottonServlet_** downward. Or put differently: no matter what setup is used, Hura injects all beans that have a session based lifecycle.
+
+But most applications require beans whose lifecycle begins with the application starting up and does not end before the app shuts down: application level singleton beans.
+
+That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
