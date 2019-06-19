@@ -1,0 +1,2 @@
+identifier.a = dynamic: {identifier.c}
+identifier.b = static: {identifier.c}
