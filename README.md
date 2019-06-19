@@ -60,7 +60,7 @@ But most applications require beans whose lifecycle begins with the application 
 
 That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
 
-### 2.c [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/localization)
+### 2.c [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
 
 Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
 
