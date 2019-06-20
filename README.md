@@ -1,73 +1,117 @@
-# Cotton Flow Demo
-
-This repository supplies a set of tutorials to present the main features of [Cotton 2](https://github.com/MantledIllusion/cotton-flow), which is an extension to Vaadin Flow.
-
-The tutorials are divided into logical chapters with multiple tutorials each. Each tutorial has its own branch, so its code can be checked out individually.
-
-The **README.md** of at the root of each branch will provide a step-by-step tutorial through each lesson. Note that from chapter 2 on, a Hura WebLaunch Setup (see chapter 1.b) from the master branch which is stripped down to be launched from an IDE is used for all the tutorials.
-
-## Chapter 1: Cotton Flow Setups
-
-Since Vaadin's Java API is based on the Servlet-API and Cotton is a mere extension of that Java API, Cotton can be run in all Servlet-API compatible environments.
-
-The tutorials of this chapter provide several ways to build, run and deploy a Cotton-based Vaadin Flow application.
-
-### 1.a: [Hura Web Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/a/hura_web_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura Web, which provides an injected, Servlet-API based application environment.
-
-It is ideal for adding extremely light-weight application environment injection when building a .WAR to deploy on application servers.
-
-### 1.b: [Hura WebLaunch Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/b/hura_weblaunch_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura WebLaunch, which extends Hura Web with [Undertow](https://github.com/undertow-io/undertow), a lightweight high-performance embedded application server.
-
-This setup provides lightning fast application startup while packing a low profile .JAR with embedded application server.
-
-### 1.c: [Spring WebMVC Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/c/spring_webmvc_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-WebMVC](https://github.com/spring-projects/spring-framework), Cotton can be build into a Spring environment .WAR, where Cotton is responsible for view injection while Spring injects environment beans like web service endpoints and database connectors.
-
-### 1.d: [Spring-Boot Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/d/spring_boot_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-Boot](https://github.com/spring-projects/spring-boot), Cotton can be build into a Spring environment .JAR, where Cotton is responsible for view injection while Spring provides an embedded webserver and injects environment beans like web service endpoints and database connectors.
-
-### 1.e: [Native Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/e/native_setup)
-
-Vaadin uses Servlet-API; so a Cotton application can be build as a simple .WAR, without any strings attached.
-
-## Chapter 2: Configuring the Environment
-
-One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things are things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
-
-### 2.a: [Automatic Route Discovery](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/a/automatic_route_discovery)
-
-Vaadin maps URLs to views with **_Router_**, where all visitable views are registered. 
-
-When using external application servers, Servlet-API mechanisms will help Vaadin register components annotated with _@Route_ automatically.
-
-When using an embedded one, you can delegate that job to Cotton.
-
-### 2.b: [Defining Application-Level (Singleton) Beans](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/define_app_level_beans)
-
-Hura is responsible for injecting every kind of bean from the **_CottonServlet_** downward. Or put differently: no matter what setup is used, Hura injects all beans that have a session based lifecycle.
-
-But most applications require beans whose lifecycle begins with the application starting up and does not end before the app shuts down: application level singleton beans.
-
-That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
-
-### 2.c: [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
-
-Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
-
-Vaadin Flow already comes with a set of features to fulfill this purpose, but Cotton is able to easily load translations into these features and to retrieve from them from every point in the application.
-
-### 2.d: [Login & Access Restriction](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/d/login_and_access_restriction)
+# Chapter 2.d: Login & Access Restriction
 
 The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
 
 Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
+
+## The Cotton User
+
+**_Cotton_** only has a very broad concept of a user; it is an entity that can either exist in a session or not and might have 0&#8594;n rights embodied by string identifiers.
+
+For this purpose **_Cotton_** offers the interface **_User_**, which just contains 1 method receiving a set of such right identifiers. The method then has to check whether the **_User_** own all of the rights of the given identifiers and return back a boolean value.
+
+## Manually Logging a User in/out
+
+As being said, a session in **_Cotton_** can either contain one or none **_User_** instance. 
+
+The **_WebEnv_** allows manual access to that instance as well as allowing to either set (log in) or remove (log out) the current **_User_**:
+
+````java
+WebEnv.isLoggedIn();
+WebEnv.getLoggedInUser();
+WebEnv.logIn(user);
+WebEnv.logOut();
+````
+
+## Restricting access to a Route
+
+**_Cotton_** offers the **_@Restricted_** annotation that can be used on any **_Component_** that is a direct root navigation target, for example by being annotated with **_@Route_**.
+
+When a navigation target is annotated with _@Restricted_, **_Cotton_** will automatically check the session's current **_User_** to exist. If there are right identifiers given to the annotation, **_Cotton_** will also check that the **_User_** currently logged in possesses these rights before navigating.
+
+To restrict access to our **_DemoView_**, we simply annotate it:
+
+````java
+@Route("demo")
+@Restricted("right_a")
+public class DemoView extends Div {
+
+    public DemoView() {
+        Button b = new Button("Logout");
+        b.addClickListener(event -> WebEnv.logOut());
+        add(new HorizontalLayout(new Label("Accessed!"), b));
+    }
+}
+````
+
+When navigating to **_DemoView_** now, there has to be a user in the session that also possesses the right with the identifier "_right_a_".
+
+**Note that the _@Restricted_ annotation only works on the top level navigation target; it has no effect on any sub views a navigation target might have!**
+
+## Automatic Login
+
+When a visitor navigates to a restricted navigation target but is not logged in as a **_User_**, **_Cotton_** will have to deny access by causing a **HTTP403** error.
+
+Most of the time the visitor will actually be a person that is already registered as a user, but simply is not logged in _yet_.
+
+For this scenario, **_Cotton_** can automatically cause a login process instead of causing a premature **HTTP403** error by using an implementation of the **_LoginProvider_** class.
+
+### Automatically log in by View
+
+When a not logged in visitor tries to access a restricted navigation target, **_Cotton_** can redirect to a login view first where that visitor can either credentials for authentication.
+
+That view can be any **_Component_** and is expected to call the _**WebEnv**.logIn()_ when the visitor has entered credentials. 
+
+````java
+@Route("login")
+public class DemoLoginView extends VerticalLayout {
+
+    private static final User USER = new User() {
+
+        @Override
+        public boolean hasRights(Set<String> rightIds) {
+            return true;
+        }
+    };
+
+    public DemoLoginView() {
+        setSizeFull();
+
+        Button b = new Button("Login");
+        b.addClickListener(event -> WebEnv.logIn(USER));
+        add(b);
+    }
+}
+````
+
+Note that the User in this example is only a mock that simply mocks owning any right.
+
+Calling _**WebEnv**.login()_ will trigger a **_Page_** reload. Since the login view was only rerouted to, that reload will cause the restricted view to be visited again.
+
+The login view can be defined in the environment **_Blueprint_** as **_LoginProvider_** like so:
+
+````java
+@Define
+public SingletonAllocation defineLoginProvider() {
+    return CottonEnvironment.forLoginProvider(LoginProvider.byView(DemoLoginView.class));
+}
+````
+
+### Automatically log in by UserProvider
+
+Not all applications have a login view themselves; for example, some applications might user a single sign-on service.
+
+For these cases **_Cotton_** offers to specify an implementation of the **_UserProvider_** interface as the **_LoginProvider_**. That instance will be called when an automatic login is triggered and might cause any action necessary. 
+
+For example, it could check the query parameters for an authentication token;
+- If there is none, redirect to the login mask of the single sign-on service
+- If there is one, call the webservice single sign-on service to validate it and return a **_User_** instance
+
+The **_UserProvider_** can be defined in the environment **_Blueprint_** as **_LoginProvider_** like so:
+
+````java
+@Define
+public SingletonAllocation defineLoginProvider() {
+    return CottonEnvironment.forLoginProvider(LoginProvider.byUserProvider(new DemoUserProvider()));
+}
+````
