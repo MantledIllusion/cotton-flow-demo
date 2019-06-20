@@ -1,79 +1,107 @@
-# Cotton Flow Demo
-
-This repository supplies a set of tutorials to present the main features of [Cotton 2](https://github.com/MantledIllusion/cotton-flow), which is an extension to Vaadin Flow.
-
-The tutorials are divided into logical chapters with multiple tutorials each. Each tutorial has its own branch, so its code can be checked out individually.
-
-The **README.md** of at the root of each branch will provide a step-by-step tutorial through each lesson. Note that from chapter 2 on, a Hura WebLaunch Setup (see chapter 1.b) from the master branch which is stripped down to be launched from an IDE is used for all the tutorials.
-
-## Chapter 1: Cotton Flow Setups
-
-Since Vaadin's Java API is based on the Servlet-API and Cotton is a mere extension of that Java API, Cotton can be run in all Servlet-API compatible environments.
-
-The tutorials of this chapter provide several ways to build, run and deploy a Cotton-based Vaadin Flow application.
-
-### 1.a: [Hura Web Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/a/hura_web_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura Web, which provides an injected, Servlet-API based application environment.
-
-It is ideal for adding extremely light-weight application environment injection when building a .WAR to deploy on application servers.
-
-### 1.b: [Hura WebLaunch Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/b/hura_weblaunch_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura WebLaunch, which extends Hura Web with [Undertow](https://github.com/undertow-io/undertow), a lightweight high-performance embedded application server.
-
-This setup provides lightning fast application startup while packing a low profile .JAR with embedded application server.
-
-### 1.c: [Spring WebMVC Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/c/spring_webmvc_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-WebMVC](https://github.com/spring-projects/spring-framework), Cotton can be build into a Spring environment .WAR, where Cotton is responsible for view injection while Spring injects environment beans like web service endpoints and database connectors.
-
-### 1.d: [Spring-Boot Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/d/spring_boot_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-Boot](https://github.com/spring-projects/spring-boot), Cotton can be build into a Spring environment .JAR, where Cotton is responsible for view injection while Spring provides an embedded webserver and injects environment beans like web service endpoints and database connectors.
-
-### 1.e: [Native Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/e/native_setup)
-
-Vaadin uses Servlet-API; so a Cotton application can be build as a simple .WAR, without any strings attached.
-
-## Chapter 2: Configuring the Environment
-
-One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things are things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
-
-### 2.a: [Automatic Route Discovery](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/a/automatic_route_discovery)
-
-Vaadin maps URLs to views with **_Router_**, where all visitable views are registered. 
-
-When using external application servers, Servlet-API mechanisms will help Vaadin register components annotated with _@Route_ automatically.
-
-When using an embedded one, you can delegate that job to Cotton.
-
-### 2.b: [Defining Application-Level (Singleton) Beans](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/define_app_level_beans)
-
-Hura is responsible for injecting every kind of bean from the **_CottonServlet_** downward. Or put differently: no matter what setup is used, Hura injects all beans that have a session based lifecycle.
-
-But most applications require beans whose lifecycle begins with the application starting up and does not end before the app shuts down: application level singleton beans.
-
-That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
-
-### 2.c: [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
-
-Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
-
-Vaadin Flow already comes with a set of features to fulfill this purpose, but Cotton is able to easily load translations into these features and to retrieve from them from every point in the application.
-
-### 2.d: [Login & Access Restriction](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/d/login_and_access_restriction)
-
-The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
-
-Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
-
-### 2.e: [Consuming Metrics](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/e/consuming_metrics)
+# Chapter 2.e: Consuming Metrics
 
 Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/MantledIllusion/trail-metrics/tree/master/trail-metrics-support-vaadin-flow) that enables dispatching session based metrics from anywhere in the application and even dispatches a set of general metrics itself.
 
 If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
+
+## Committing Metrics
+
+In every **_Cotton_** session the **_VaadinMetricsTrailSupport_** can be used to retrieve the current **_MetricsTrail_**, so metrics an be committed from anywhere; for example, our **_DemoView_**:
+
+````java
+@Route("demo")
+public class DemoView extends Div {
+
+    private static final Consumer<ClickEvent> METRICS_DISPATCHER = event ->
+        VaadinMetricsTrailSupport.getCurrent().commit(new Metric("clickmetric", MetricType.ALERT));
+
+    public DemoView() {
+        Button b = new Button("Create Click Metric");
+        b.addClickListener(METRICS_DISPATCHER::accept);
+        add(b);
+    }
+}
+````
+
+Every button click now generates a new simple **ALERT** **_Metric_** with the identifier "_clickmetric_". It will be delivered to all consumers asynchronously by the **_MetricsTrail_**.
+
+## Registering a MetricsConsumer
+
+The **_TrailMetrics_** API supplies the interface **_MetricsConsumer_**, whose implementations are able to receive metrics from every trail, while a trail in the **_Vaadin_** support equals a session.
+
+First, we will implement a cache for our metrics, so we can access them from anywhere:
+
+````java
+public class DemoMetricsCache {
+
+    public static final String QUALIFIER_CACHE = "_demoMetricsCache";
+
+    private final Map<UUID, List<Metric>> trailCache = new ConcurrentHashMap<>();
+
+    public void add(UUID trailId, Metric metric) {
+        if (GeneralVaadinMetrics.SESSION_END.getMetricId().equals(metric.getIdentifier())) {
+            this.trailCache.remove(trailId);
+        } else {
+            this.trailCache.computeIfAbsent(trailId, id -> Collections.synchronizedList(new ArrayList<>())).add(metric);
+        }
+    }
+
+    public List<Metric> getSessionMetrics() {
+        if (VaadinMetricsTrailSupport.getCurrent() == null || !this.trailCache.containsKey(VaadinMetricsTrailSupport.getCurrent().getTrailId())) {
+            return Collections.emptyList();
+        } else {
+            return this.trailCache.get(VaadinMetricsTrailSupport.getCurrent().getTrailId());
+        }
+    }
+}
+````
+
+The cache is able to receive a metric for a trail and return all metrics of the current session's trail. Note that we clear the all metrics of a session once the session ends.
+
+Now that we have a cache to put metrics in, we create a consumer to do that. Consumers can be registered using the environment **_Blueprint_**:
+
+````java
+@Inject
+private DemoMetricsCache cache;
+
+@Define
+public SingletonAllocation defineMetricsConsumer() {
+    MetricsConsumer consumer = (consumerId, trailId, metric) -> this.cache.add(trailId, metric);
+    return CottonEnvironment.forMetricsConsumer("demoConsumer", consumer, null, null);
+}
+
+@Define
+public SingletonAllocation defineCache() {
+    return SingletonAllocation.of(DemoMetricsCache.QUALIFIER_CACHE, this.cache);
+}
+````
+
+A simple lambda for our consumer is enough. Every metric from every session coming in will be put in the cache now. Keep in mind that the consumer will be called asynchronously using threads parallel to the one serving the session, so we have to use concurrent map and list instances.
+
+Since we also defined our cache as a singleton, we can access it from anywhere in our application; for example our **_MetricsView_**, where we can display them all:
+
+````java
+@Route("metrics")
+public class MetricsView extends Div {
+
+    private static final Function<Metric, String> OPERATOR_RETRIEVER = metric ->
+            StringUtils.join(metric.getAttributes(), ", ");
+
+    public MetricsView(@Inject @Qualifier(DemoMetricsCache.QUALIFIER_CACHE) DemoMetricsCache cache) {
+        Grid<Metric> grid = new Grid<>();
+        grid.addColumn(Metric::getIdentifier).setHeader("Identifier").setFlexGrow(0).setWidth("200px");
+        grid.addColumn(Metric::getType).setHeader("Type").setFlexGrow(0);
+        grid.addColumn(Metric::getTimestamp).setHeader("Timestamp").setFlexGrow(0).setWidth("300px");
+        grid.addColumn(OPERATOR_RETRIEVER::apply).setHeader("Operator").setFlexGrow(1);
+        add(grid);
+
+        grid.setItems(cache.getSessionMetrics());
+    }
+}
+````
+
+When accessing the view the grid will display any click metric from the **_DemoView_**, but also:
+- Metrics from the **_GeneralVaadinMetrics_** enum of the **_Vaadin Flow_** **_MetricsTrail_** support, like _general.session.begin_
+- Metrics from the **_CottonMetrics_** enum of **_Cotton_** itself, like _cotton.system.injection_
+
+These enums contain metrics that record common events like visits, navigations or even errors.
