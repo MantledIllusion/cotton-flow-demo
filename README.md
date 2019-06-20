@@ -71,3 +71,9 @@ Vaadin Flow already comes with a set of features to fulfill this purpose, but Co
 The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
 
 Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
+
+### 2.e: [Consuming Metrics](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/e/consuming_metrics)
+
+Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/MantledIllusion/trail-metrics/tree/master/trail-metrics-support-vaadin-flow) that enables dispatching session based metrics from anywhere in the application and even dispatches a set of general metrics itself.
+
+If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
