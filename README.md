@@ -60,8 +60,14 @@ But most applications require beans whose lifecycle begins with the application 
 
 That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
 
-### 2.c [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
+### 2.c: [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
 
 Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
 
 Vaadin Flow already comes with a set of features to fulfill this purpose, but Cotton is able to easily load translations into these features and to retrieve from them from every point in the application.
+
+### 2.d: [Login & Access Restriction](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/d/login_and_access_restriction)
+
+The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
+
+Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
