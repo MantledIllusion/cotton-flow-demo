@@ -77,3 +77,7 @@ Cotton offers a generic mechanisms that provide functionality for setting a curr
 Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/MantledIllusion/trail-metrics/tree/master/trail-metrics-support-vaadin-flow) that enables dispatching session based metrics from anywhere in the application and even dispatches a set of general metrics itself.
 
 If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
+
+### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
+
+Building UI in **_Vaadin_** requires creating and configuring lots and lots of UI components. **_Cotton_** contains a set of fluent component builders to cope with the repeated setter calling of components.
