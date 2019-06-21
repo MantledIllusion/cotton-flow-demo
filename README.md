@@ -1,87 +1,93 @@
-# Cotton Flow Demo
-
-This repository supplies a set of tutorials to present the main features of [Cotton 2](https://github.com/MantledIllusion/cotton-flow), which is an extension to Vaadin Flow.
-
-The tutorials are divided into logical chapters with multiple tutorials each. Each tutorial has its own branch, so its code can be checked out individually.
-
-The **README.md** of at the root of each branch will provide a step-by-step tutorial through each lesson. Note that from chapter 2 on, a Hura WebLaunch Setup (see chapter 1.b) from the master branch which is stripped down to be launched from an IDE is used for all the tutorials.
-
-## Chapter 1: Cotton Flow Setups
-
-Since Vaadin's Java API is based on the Servlet-API and Cotton is a mere extension of that Java API, Cotton can be run in all Servlet-API compatible environments.
-
-The tutorials of this chapter provide several ways to build, run and deploy a Cotton-based Vaadin Flow application.
-
-### 1.a: [Hura Web Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/a/hura_web_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura Web, which provides an injected, Servlet-API based application environment.
-
-It is ideal for adding extremely light-weight application environment injection when building a .WAR to deploy on application servers.
-
-### 1.b: [Hura WebLaunch Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/b/hura_weblaunch_setup)
-
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura WebLaunch, which extends Hura Web with [Undertow](https://github.com/undertow-io/undertow), a lightweight high-performance embedded application server.
-
-This setup provides lightning fast application startup while packing a low profile .JAR with embedded application server.
-
-### 1.c: [Spring WebMVC Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/c/spring_webmvc_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-WebMVC](https://github.com/spring-projects/spring-framework), Cotton can be build into a Spring environment .WAR, where Cotton is responsible for view injection while Spring injects environment beans like web service endpoints and database connectors.
-
-### 1.d: [Spring-Boot Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/d/spring_boot_setup)
-
-Spring is the all-time favorite for building feature-heavy applications fast.
-
-In combination with [Spring-Boot](https://github.com/spring-projects/spring-boot), Cotton can be build into a Spring environment .JAR, where Cotton is responsible for view injection while Spring provides an embedded webserver and injects environment beans like web service endpoints and database connectors.
-
-### 1.e: [Native Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/e/native_setup)
-
-Vaadin uses Servlet-API; so a Cotton application can be build as a simple .WAR, without any strings attached.
-
-## Chapter 2: Configuring the Environment
-
-One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things are things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
-
-### 2.a: [Automatic Route Discovery](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/a/automatic_route_discovery)
-
-Vaadin maps URLs to views with **_Router_**, where all visitable views are registered. 
-
-When using external application servers, Servlet-API mechanisms will help Vaadin register components annotated with _@Route_ automatically.
-
-When using an embedded one, you can delegate that job to Cotton.
-
-### 2.b: [Defining Application-Level (Singleton) Beans](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/define_app_level_beans)
-
-Hura is responsible for injecting every kind of bean from the **_CottonServlet_** downward. Or put differently: no matter what setup is used, Hura injects all beans that have a session based lifecycle.
-
-But most applications require beans whose lifecycle begins with the application starting up and does not end before the app shuts down: application level singleton beans.
-
-That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
-
-### 2.c: [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
-
-Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
-
-Vaadin Flow already comes with a set of features to fulfill this purpose, but Cotton is able to easily load translations into these features and to retrieve from them from every point in the application.
-
-### 2.d: [Login & Access Restriction](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/d/login_and_access_restriction)
-
-The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
-
-Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
-
-### 2.e: [Consuming Metrics](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/e/consuming_metrics)
-
-Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/MantledIllusion/trail-metrics/tree/master/trail-metrics-support-vaadin-flow) that enables dispatching session based metrics from anywhere in the application and even dispatches a set of general metrics itself.
-
-If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
-
-## Chapter 3: Building View
-
-Vaadin is all about frontend, so its main concern is building views. Cotton provides a lot of assisting functionality for doing so, while remaining 100% compatible with native Vaadin functionality for situation when something specific has to be build.
-
-### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
+# Chapter 3.a: Component Factorizing
 
 Building UI in Vaadin requires creating and configuring lots and lots of UI components. Cotton contains a set of fluent component builders to cope with the repeated setter calling of components.
+
+## The ComponentBuilders
+
+In Cotton there is no such thing as _the_ **_ComponentBuilder_**; there is just a generic interface with that name.
+
+When in need of building a specific **_Component_** implementation, the respective builder implementation has to be used:
+- **_TextFieldBuilder_** for the **_TextField_** **_Component_**
+- **_ComboBoxBuilder_** for the **_ComboBox_** **_Component_**
+- ...
+
+## Using a ComponentBuilder
+
+Using Cotton's concrete component builders is super easy: create one and configure away. Once you are done, call build() to create a new instance of the builder's component type and apply your configuration:
+
+````java
+@Route("demo")
+public class DemoView extends Div {
+
+    public DemoView() {
+        LabelBuilder labelBuilder = new LabelBuilder()
+                .setExactWidth(100)
+                .setHeightUndefined();
+
+        add(labelBuilder.setValue("A").build(), labelBuilder.setValue("B").build());
+    }
+}
+````
+
+Noticed that we used the same builder twice? 
+
+The builder contains its own configuration state, not in the component that is being build, but in itself. That way, if we have to build several similar components, we can reuse the builder and just change what has to be different in between calling the _build()_ method.
+
+## Implementing own ComponentBuilders
+
+The concrete **_ComponentBuilder_** implementations are specific to their type of **_Component_** and benefit of the way the functionality of **_Vaadin_**'s components is implemented: by implementing the _Has*_ interfaces. 
+
+**_Vaadin_** contains a rather big set of interfaces whose name begins with _Has*_; those are implemented by components to standardize equal functionality. These interfaces describe a specific type of functionality, for example **_HasStyle_** for stylable components or **_HasValue_** for components that contain a value.
+
+**_Cotton_**'s **_ComponentBuilder_** implementations use that functional abstraction by providing a set of _Has*Builder_ interfaces, which contain the building functionality for their component type via default methods. For example, the **_TextFieldBuilder_** implementation does not need to implement its own building functionality for the methods of **_HasSize_** that a **_TextField_** offers; the **_TextFieldBuilder_** simply implements **_HasSizeBuilder_** and is all set.
+
+As a result, the concrete builders for a specific component type only have to contain such functionality that is not declared by a _Has*_ interface and remain rather slim.
+
+When you implement a **_ComponentBuilder_** for a third party type of **_Component_**, simply implement the _Has*Builder_ interfaces and 90% of the work is done; now you can concentrate on the special functionality your specific **_Component_** provides.
+
+So let's first create a custom component:
+
+````java
+public class AwesomeField extends Composite<TextField> implements HasSize {
+
+    public AwesomeField() {
+        getContent().setLabel("Write something awesome!");
+    }
+
+    public void setAwesomeText(String text) {
+        getContent().setValue(text);
+    }
+}
+````
+
+It implements the **_HasSize_** interface and provides one own specific method; both should be configurable with our builder:
+
+````java
+public class AwesomeFieldBuilder extends AbstractComponentBuilder<AwesomeField, AwesomeFieldBuilder>
+		implements HasSizeBuilder<AwesomeField, AwesomeFieldBuilder> {
+
+    @Override
+    public AwesomeField instantiate() {
+        return new AwesomeField();
+    }
+
+    public AwesomeFieldBuilder setAwesomeText(String text) {
+        configure(field -> field.setAwesomeText(text));
+        return this;
+    }
+}
+````
+
+We have implemented the **_HasSizeBuilder_**, so we also have its whole functionality. Also, we have created a method to configure our special functionality by creating an instance of the functional interface **_Configurer_**. When _build()_ is called on our builder, that **_Configurer_** will be applied on a new instance of our custom component.
+
+That's all! We can now use our builder:
+
+````java
+@Route("custom")
+public class CustomComponentView extends Div {
+
+    public CustomComponentView() {
+        add(new AwesomeFieldBuilder().setExactWidth(250).setAwesomeText("<<replace with awesome>>").build());
+    }
+}
+````
