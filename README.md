@@ -85,3 +85,9 @@ Vaadin is all about frontend, so its main concern is building views. Cotton prov
 ### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
 
 Building UI in Vaadin requires creating and configuring lots and lots of UI components. Cotton contains a set of fluent component builders to cope with the repeated setter calling of components.
+
+### 3.b: [The EventBus](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/b/the_eventbus)
+
+As frontends grow, there sooner or later will always be a need for sending messages between separated parts of the application. To prevent class dependency hell, it is better to decouple those parts since they do not need know each other, but make them exchange messages anonymously via event bus.
+
+Cotton offers a build-in event bus, were subscribing beans to that bus are automatically hooked on and of with their life cycle.
