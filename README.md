@@ -78,6 +78,10 @@ Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/
 
 If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
 
+## Chapter 3: Building View
+
+Vaadin is all about frontend, so its main concern is building views. Cotton provides a lot of assisting functionality for doing so, while remaining 100% compatible with native Vaadin functionality for situation when something specific has to be build.
+
 ### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
 
-Building UI in **_Vaadin_** requires creating and configuring lots and lots of UI components. **_Cotton_** contains a set of fluent component builders to cope with the repeated setter calling of components.
+Building UI in Vaadin requires creating and configuring lots and lots of UI components. Cotton contains a set of fluent component builders to cope with the repeated setter calling of components.
