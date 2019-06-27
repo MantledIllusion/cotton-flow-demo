@@ -91,3 +91,9 @@ Building UI in Vaadin requires creating and configuring lots and lots of UI comp
 As frontends grow, there sooner or later will always be a need for sending messages between separated parts of the application. To prevent class dependency hell, it is better to decouple those parts since they do not need know each other, but make them exchange messages anonymously via event bus.
 
 The injection framework Hura which is included in Cotton offers a build-in event bus, where subscribing beans to that bus are automatically hooked on and off with their life cycle. Cotton pre-configures that bus, so no events of session beans can leave their own session, making it impossible to mistakenly alert bus subscribers that are not meant to be contacted.
+
+### 3.c: [Presenting Views](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/c/presenting_views)
+
+The MVP (Model/View/Presenter) pattern is a popular architectural pattern that can be applied to basically all types of frontends.
+
+Cotton supports MVP by providing functionality of creating and hooking a presenter to a view, without allowing the view to be able to obtain a reference to that presenter.
