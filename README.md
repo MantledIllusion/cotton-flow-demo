@@ -97,3 +97,13 @@ The injection framework Hura which is included in Cotton offers a build-in event
 The MVP (Model/View/Presenter) pattern is a popular architectural pattern that can be applied to basically all types of frontends.
 
 Cotton supports MVP by providing functionality of creating and hooking a presenter to a view, without allowing the view to be able to obtain a reference to that presenter.
+
+### 3.d: [Building a Plugin UI](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/d/building_a_plugin_ui)
+
+In some cases it might be a great idea so take modularization of a frontend to the next level; by linking together the parts as separated plugins. 
+
+One example of such a situation might be the frontend for a _Service Ortiented Architecture_ (SOA). With the application cleanly separated (for example into services for customer, order and product using _Domain Driven Design_), changes to those services could be deployed at any time without affecting the rest of the platform.
+
+But with a monolith frontend, every API changing service deployment would have the effect of the complete frontend having to be redeployed as well. Using a plugin based frontend (with the single plugins of the frontend shaped just as the service), it would be possible to keep the frontend up and running while just deploying an updated plugin for the service.
+
+Since Cotton uses Hura 2, basic plugin functionality is already on board, ready to be used.
