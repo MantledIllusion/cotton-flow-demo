@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mantledillusion.vaadin</groupId>
-    <artifactId>cotton-flow-demo</artifactId>
+    <artifactId>cotton-flow-demo-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <properties>
         <!-- java compiler version -->
@@ -13,24 +13,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <dependencies>
-        <!-- com.mantledillusion dependencies -->
-        <dependency>
-            <groupId>com.mantledillusion.vaadin</groupId>
-            <artifactId>cotton</artifactId>
-            <version>2.0.0.ALPHA7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mantledillusion.injection</groupId>
-            <artifactId>hura-weblaunch</artifactId>
-            <version>2.0.0.ALPHA3</version>
-        </dependency>
-
-        <!-- ch.qos.lockback dependencies -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>cotton-flow-demo-core</module>
+        <module>cotton-flow-demo-api</module>
+        <module>cotton-flow-demo-viewa</module>
+        <module>cotton-flow-demo-viewb</module>
+    </modules>
 </project>

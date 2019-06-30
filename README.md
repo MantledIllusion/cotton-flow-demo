@@ -1,99 +1,147 @@
-# Cotton Flow Demo
+# Chapter 3.d: Building a Plugin UI
 
-This repository supplies a set of tutorials to present the main features of [Cotton 2](https://github.com/MantledIllusion/cotton-flow), which is an extension to Vaadin Flow.
+In some cases it might be a great idea so take modularization of a frontend to the next level; by linking together the parts as separated plugins. 
 
-The tutorials are divided into logical chapters with multiple tutorials each. Each tutorial has its own branch, so its code can be checked out individually.
+One example of such a situation might be the frontend for a _Service Ortiented Architecture_ (SOA). With the application cleanly separated (for example into services for customer, order and product using _Domain Driven Design_), changes to those services could be deployed at any time without affecting the rest of the platform.
 
-The **README.md** of at the root of each branch will provide a step-by-step tutorial through each lesson. Note that from chapter 2 on, a Hura WebLaunch Setup (see chapter 1.b) from the master branch which is stripped down to be launched from an IDE is used for all the tutorials.
+But with a monolith frontend, every API changing service deployment would have the effect of the complete frontend having to be redeployed as well. Using a plugin based frontend (with the single plugins of the frontend shaped just as the service), it would be possible to keep the frontend up and running while just deploying an updated plugin for the service.
 
-## Chapter 1: Cotton Flow Setups
+Since Cotton uses Hura 2, basic plugin functionality is already on board, ready to be used.
 
-Since Vaadin's Java API is based on the Servlet-API and Cotton is a mere extension of that Java API, Cotton can be run in all Servlet-API compatible environments.
+## Setting up a structure
 
-The tutorials of this chapter provide several ways to build, run and deploy a Cotton-based Vaadin Flow application.
+Since we will build completely separated parts for the application we will need a multi-module Maven project:
+- parent
+    - api (contains common objects)
+    - core (the frontend application)
+    - viewa (the first plugin)
+    - viewb (the second plugin)
 
-### 1.a: [Hura Web Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/a/hura_web_setup)
 
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura Web, which provides an injected, Servlet-API based application environment.
+## Creating an API
 
-It is ideal for adding extremely light-weight application environment injection when building a .WAR to deploy on application servers.
+Of course, it would be possible to compose a frontend from plugins that share no common ground; but that would limit those plugins abilities to work together to zero.
 
-### 1.b: [Hura WebLaunch Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/b/hura_weblaunch_setup)
+For this example, we will just add a single class into the API:
+````java
+public class ApiEvent {
 
-Since Cotton uses [Hura](https://github.com/MantledIllusion/hura) 2's core for injection, it can easily be combined with Hura WebLaunch, which extends Hura Web with [Undertow](https://github.com/undertow-io/undertow), a lightweight high-performance embedded application server.
+    private final Object source;
+    private final String text;
 
-This setup provides lightning fast application startup while packing a low profile .JAR with embedded application server.
+    public ApiEvent(Object source,String text) {
+        this.source = source;
+        this.text = text;
+    }
 
-### 1.c: [Spring WebMVC Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/c/spring_webmvc_setup)
+    public Object getSource() {
+        return source;
+    }
 
-Spring is the all-time favorite for building feature-heavy applications fast.
+    public String getText() {
+        return text;
+    }
+}
+````
+This is just an event that is able to carry its source and a text message from one bean to another.
 
-In combination with [Spring-WebMVC](https://github.com/spring-projects/spring-framework), Cotton can be build into a Spring environment .WAR, where Cotton is responsible for view injection while Spring injects environment beans like web service endpoints and database connectors.
+## Creating the Core App
 
-### 1.d: [Spring-Boot Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/d/spring_boot_setup)
+This application simply is the standard demo, with a dependency to our API.
 
-Spring is the all-time favorite for building feature-heavy applications fast.
+Our **_DemoView_** will now not contain any UI itself: it is just composed by plugins:
 
-In combination with [Spring-Boot](https://github.com/spring-projects/spring-boot), Cotton can be build into a Spring environment .JAR, where Cotton is responsible for view injection while Spring provides an embedded webserver and injects environment beans like web service endpoints and database connectors.
+````java
+@Route("demo")
+public class DemoView extends Div {
 
-### 1.e: [Native Setup](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/e/native_setup)
+    private DemoView(@Plugin(directory = "./cotton-flow-demo-viewa/target", pluginId = "ViewA") Component a,
+                     @Plugin(directory = "./cotton-flow-demo-viewb/target", pluginId = "ViewB") Component b) {
+        add(a, b);
+    }
+}
+````
 
-Vaadin uses Servlet-API; so a Cotton application can be build as a simple .WAR, without any strings attached.
+**NOTE**: When this demo project is executed by an IDE like IntelliJ, the root of the running application will be the root directory of the project. For simplification, the plugin directories are pointing to the target folder of the plugin's Maven target directories here. In a real application, the directory would be some directory on the frontend server that the plugins are deployed into.
 
-## Chapter 2: Configuring the Environment
+Also note that the injected plugins are just identified by the **_Component_** class; the real implementation type is unknown to the core.
 
-One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things are things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
+## Creating the Plugins
 
-### 2.a: [Automatic Route Discovery](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/a/automatic_route_discovery)
+The plugins ViewA and ViewB are roughly similar; we just exchange the A in the name's to B, so its enough to demonstrate how the project for the plugin A is set up.
 
-Vaadin maps URLs to views with **_Router_**, where all visitable views are registered. 
+First, we set up the POM for the project:
 
-When using external application servers, Servlet-API mechanisms will help Vaadin register components annotated with _@Route_ automatically.
+````xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-When using an embedded one, you can delegate that job to Cotton.
+    <parent>
+        <groupId>com.mantledillusion.vaadin</groupId>
+        <artifactId>cotton-flow-demo-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-### 2.b: [Defining Application-Level (Singleton) Beans](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/b/define_app_level_beans)
+    <artifactId>cotton-flow-demo-viewb</artifactId>
+    <packaging>jar</packaging>
 
-Hura is responsible for injecting every kind of bean from the **_CottonServlet_** downward. Or put differently: no matter what setup is used, Hura injects all beans that have a session based lifecycle.
+    <dependencies>
+        <dependency>
+            <groupId>com.mantledillusion.vaadin</groupId>
+            <artifactId>cotton-flow-demo-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-But most applications require beans whose lifecycle begins with the application starting up and does not end before the app shuts down: application level singleton beans.
+        <!-- com.mantledillusion dependencies -->
+        <dependency>
+            <groupId>com.mantledillusion.vaadin</groupId>
+            <artifactId>cotton</artifactId>
+            <version>2.0.0.ALPHA7</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
-That are beans like service endpoints, database controllers and so on. Their lifecycle is not bound to Cotton, but they need to be injected into beans whose lifecycle is. For that purpose, app-level singletons can be pre defined.
+    <build>
+        <finalName>ViewB</finalName>
+    </build>
+</project>
+````
 
-### 2.c: [Localization](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/c/localization)
+We need depencies to **_Cotton_** and obviously to our API; but in the running application, both will be provided by the frontends core, so they are not required to be included into the JAR.
 
-Adapting to a user's language is already important for desktop applications, but it is critical for the web since usually the whole world will have access to a site.
+Also, we set a fixed name for our JAR, so it can be found easily by the core.
 
-Vaadin Flow already comes with a set of features to fulfill this purpose, but Cotton is able to easily load translations into these features and to retrieve from them from every point in the application.
+Now we can create our plugin view:
 
-### 2.d: [Login & Access Restriction](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/d/login_and_access_restriction)
+````java
+public class ViewA extends Div {
 
-The huge majority of applications require a login mechanism of some kind, either for access restriction and/or for determining which rights the current use owns.
+    private TextField textField;
 
-Cotton offers a generic mechanisms that provide functionality for setting a current user and behaving differently according to that users rights.
+    public ViewA(@Inject Bus bus) {
+        this.textField = new TextField("View A");
+        this.textField.addKeyPressListener(Key.ENTER, event -> bus.publish(
+                new ApiEvent(ViewA.this, this.textField.getValue())));
+        add(this.textField);
+    }
 
-### 2.e: [Consuming Metrics](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/e/consuming_metrics)
+    @Subscribe
+    private void receive(ApiEvent event) {
+        if (event.getSource() != this) {
+            this.textField.setValue(event.getSource().getClass().getSimpleName()+" says: "+event.getText());
+        }
+    }
+}
+````
 
-Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/MantledIllusion/trail-metrics/tree/master/trail-metrics-support-vaadin-flow) that enables dispatching session based metrics from anywhere in the application and even dispatches a set of general metrics itself.
+We inject **_Hura_**'s event bus. On ENTER key press in our view (that is only composed of a **_TextField_**), we publish the API's event using that bus.
 
-If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
+Also we provide a method that is able to receive the API event; when an event comes in that is not from the view itself, the view uses its **_TestField_** to display what that other source has sent.
 
-## Chapter 3: Building View
-
-Vaadin is all about frontend, so its main concern is building views. Cotton provides a lot of assisting functionality for doing so, while remaining 100% compatible with native Vaadin functionality for situation when something specific has to be build.
-
-### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
-
-Building UI in Vaadin requires creating and configuring lots and lots of UI components. Cotton contains a set of fluent component builders to cope with the repeated setter calling of components.
-
-### 3.b: [The EventBus](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/b/the_eventbus)
-
-As frontends grow, there sooner or later will always be a need for sending messages between separated parts of the application. To prevent class dependency hell, it is better to decouple those parts since they do not need know each other, but make them exchange messages anonymously via event bus.
-
-The injection framework Hura which is included in Cotton offers a build-in event bus, where subscribing beans to that bus are automatically hooked on and off with their life cycle. Cotton pre-configures that bus, so no events of session beans can leave their own session, making it impossible to mistakenly alert bus subscribers that are not meant to be contacted.
-
-### 3.c: [Presenting Views](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/c/presenting_views)
-
-The MVP (Model/View/Presenter) pattern is a popular architectural pattern that can be applied to basically all types of frontends.
-
-Cotton supports MVP by providing functionality of creating and hooking a presenter to a view, without allowing the view to be able to obtain a reference to that presenter.
+When the plugin is loaded by the core, the core has to be able to find what class to use for injection. **_Hura_** uses the specification for Java SPI META-INF service files to determine what classes from a plugin can be injected. To follow that specification, we create a file with the name **com.vaadin.flow.component.Component** (which is the fully qualified class name the plugin provides an implementation for):
+````text
+com.mantledillusion.vaadin.cotton.demo.ViewA
+````
+When Hura loads the plugin, it will find that file, notice that it contains implementations of **_Component_**, and will load **_ViewA_** from it.
