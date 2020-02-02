@@ -78,9 +78,9 @@ Cotton implements the [TrailMetrics support for Vaadin Flow](https://github.com/
 
 If desired, all dispatched metrics can be consumed and then be used for any purpose desired.
 
-## Chapter 3: Building View
+## Chapter 3: Building Views
 
-Vaadin is all about frontend, so its main concern is building views. Cotton provides a lot of assisting functionality for doing so, while remaining 100% compatible with native Vaadin functionality for situation when something specific has to be build.
+Vaadin is all about frontend, so its main concern is building views. Cotton provides a lot of assisting functionality for doing so, while remaining 100% compatible with native Vaadin functionality for situations when something specific has to be build.
 
 ### 3.a: [Component Factorizing](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/a/component_factorizing)
 
@@ -102,8 +102,20 @@ Cotton supports MVP by providing functionality of creating and hooking a present
 
 In some cases it might be a great idea so take modularization of a frontend to the next level; by linking together the parts as separated plugins. 
 
-One example of such a situation might be the frontend for a _Service Ortiented Architecture_ (SOA). With the application cleanly separated (for example into services for customer, order and product using _Domain Driven Design_), changes to those services could be deployed at any time without affecting the rest of the platform.
+One example of such a situation might be the frontend for a _Service Oriented Architecture_ (SOA). With the application cleanly separated (for example into services for customer, order and product using _Domain Driven Design_), changes to those services could be deployed at any time without affecting the rest of the platform.
 
 But with a monolith frontend, every API changing service deployment would have the effect of the complete frontend having to be redeployed as well. Using a plugin based frontend (with the single plugins of the frontend shaped just as the service), it would be possible to keep the frontend up and running while just deploying an updated plugin for the service.
 
 Since Cotton uses Hura 2, basic plugin functionality is already on board, ready to be used.
+
+## Chapter 4: Data Binding
+
+Since Vaadin 8, data binding in the framework has been overhauled to support Java 8's lambdas for a simpler use of Vaadin's Java API.
+
+Cotton integrates the data modeling framework [Epiphy](https://github.com/MantledIllusion/epiphy) for easier Vaadin data binding when handling complex Java POJO object models.
+
+The major advantage of binding to a complex model instead of single values is that exchanging a model's root can be done in a single operation, which enables to refresh the data in a whole UI in just one call.
+
+### 4.a: [Deep Model Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/a/deep_model_binding)
+
+The Epiphy framework enables access to properties that are deep down a model's object tree only while only working with the tree's root. Cotton uses this feature to bind Vaadin components implementing the _**HasValue**_ interface to data deep down in an object tree.
