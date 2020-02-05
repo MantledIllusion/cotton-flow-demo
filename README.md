@@ -42,7 +42,7 @@ Vaadin uses Servlet-API; so a Cotton application can be build as a simple .WAR, 
 
 ## Chapter 2: Configuring the Environment
 
-One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things are things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
+One thing is your application, the other is the environment it runs in. Whether its properties, singletons or security, all those things mark the boundaries your application grows in. Cotton offers several possibilities to configure that environment easily, so you can concentrate on building your application.
 
 ### 2.a: [Automatic Route Discovery](https://github.com/MantledIllusion/cotton-flow-demo/tree/02/a/automatic_route_discovery)
 
@@ -119,3 +119,7 @@ The major advantage of binding to a complex model instead of single values is th
 ### 4.a: [Deep Model Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/a/deep_model_binding)
 
 The Epiphy framework enables access to properties that are deep down a model's object tree only while only working with the tree's root. Cotton uses this feature to bind Vaadin components implementing the _**HasValue**_ interface to data deep down in an object tree.
+
+### 4.b [MVP-Compliant Data Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/b/mvp_compliant_data_binding)
+
+Cotton's MVP functionality allows applications to be split into view and logic code cleanly; and that goes for the data binding as well, where the model should be controlled elsewhere than it is bound.
