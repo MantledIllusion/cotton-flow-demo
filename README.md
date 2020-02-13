@@ -6,19 +6,28 @@ Cotton allows specifying the access mode per-field in the data binding, effectiv
 
 ## Setting up a Model
 
-For this lesson we do not need a complex model, a simple one with one **_String_** field is enough:
+For this lesson we do not need a complex model, we will just create one with two **_String_** fields, so we can differentiate the access to them:
 
 ```java
 public class Model {
 
-    private String field;
+    private String sensitiveField;
+    private String superSensitiveField;
 
-    public String getField() {
-        return field;
+    public String getSensitiveField() {
+        return sensitiveField;
     }
 
-    public void setField(String field) {
-        this.field = field;
+    public void setSensitiveField(String sensitiveField) {
+        this.sensitiveField = sensitiveField;
+    }
+
+    public String getSuperSensitiveField() {
+        return superSensitiveField;
+    }
+
+    public void setSuperSensitiveField(String superSensitiveField) {
+        this.superSensitiveField = superSensitiveField;
     }
 }
 ```
@@ -27,15 +36,17 @@ public class Model {
 
 Since we are depending on access rights here, we require a **_User_** that can be checked for rights.
 
-We only require it to have 1 right type that has editing capabilities, or none at all:
+There are 2 different right types for the different levels of data sensitivity, so we each create a user for them and also a guest user that does not have any right:
 
 ```java
 public class DemoUser implements User {
 
-    static final String RIGHT_EDITOR = "_editor";
+    static final String RIGHT_SUPER_SENSITIVE_DATA = "_admin";
+    static final String RIGHT_SENSITIVE_DATA = "_casual";
 
-    static final User USER_EDITOR = new DemoUser(RIGHT_EDITOR);
-    static final User USER_NONE = new DemoUser();
+    static final User USER_POWER = new DemoUser(RIGHT_SUPER_SENSITIVE_DATA);
+    static final User USER_CASUAL = new DemoUser(RIGHT_SENSITIVE_DATA);
+    static final User USER_GUEST = new DemoUser();
 
     private final Set<String> rightIds;
 
@@ -52,28 +63,64 @@ public class DemoUser implements User {
 
 ## Setting up the View
 
-For our view, we set up 3 things to get going:
-- Create a **_ModelProperty_** to bind on instances of our **_Model_** class
-- Set up some buttons to log in/out our different types of users
-- Inject a **_ModelAccessor_**, setting a dummy model
-
-Then, we can create the restricted binging between our ModelProperty and a TextField. This can be done using the _**ModelAccessor**.bindAndConfigure()_ method, that allows us to configure the **_Binding_** we create; this method's functionality is also embedded into the builders, so it can be used at the end of building a component:
+In our view, we will first setup the properties we need to access the **_Model_**'s data:
 
 ```java
 @Route("demo")
 public class DemoView extends VerticalLayout {
 
-    private static final ModelProperty<Model, String> FIELD = ModelProperty.fromObject(Model::getField, Model::setField);
+    private static final ModelProperty<Model, String> SENSITIVE_PROPERTY = 
+            ModelProperty.fromObject(Model::getSensitiveField, Model::setSensitiveField);
+    private static final ModelProperty<Model, String> SUPER_SENSITIVE_PROPERTY = 
+            ModelProperty.fromObject(Model::getSuperSensitiveField, Model::setSuperSensitiveField);
+    
+    ...
+}
+```
+
+In the constructor, we inject ourselves a **_ModelAccessor_** and set a **_Model_** instance to it:
+
+```java
+@Route("demo")
+public class DemoView extends VerticalLayout {
+
+    ...
 
     public DemoView(@Inject ModelAccessor<Model> accessor) {
+        Model model = new Model();
+        model.setSensitiveField("Some sensitive value");
+        model.setSuperSensitiveField("Some super sensitive value");
+        accessor.setModel(model);
+
+        ...
+    }
+}
+```
+
+Next we create a button bar which is able to login each of our 3 users, or log the current user out:
+
+```java
+@Route("demo")
+public class DemoView extends VerticalLayout {
+
+    ...
+
+    public DemoView(@Inject ModelAccessor<Model> accessor) {
+        
+        ...
+
         add(new HorizontalLayoutBuilder().
                 add(new ButtonBuilder().
-                        setValue("Login Editor").
-                        addClickListener(e -> WebEnv.logIn(DemoUser.USER_EDITOR)).
+                        setValue("Login Power User").
+                        addClickListener(e -> WebEnv.logIn(DemoUser.USER_POWER)).
                         build()).
                 add(new ButtonBuilder().
-                        setValue("Login Guest").
-                        addClickListener(e -> WebEnv.logIn(DemoUser.USER_NONE)).
+                        setValue("Login Casual User").
+                        addClickListener(e -> WebEnv.logIn(DemoUser.USER_CASUAL)).
+                        build()).
+                add(new ButtonBuilder().
+                        setValue("Login Guest User").
+                        addClickListener(e -> WebEnv.logIn(DemoUser.USER_GUEST)).
                         build()).
                 add(new ButtonBuilder().
                         setValue("Logout").
@@ -81,30 +128,86 @@ public class DemoView extends VerticalLayout {
                         build()).
                 build());
 
-        add(new TextFieldBuilder().
-                bindAndConfigure(accessor, FIELD).
-                withRestriction(User.UserRightBindingAuditor.readWrite(DemoUser.RIGHT_EDITOR)).
-                withRestriction(User.UserRightBindingAuditor.readOnly()).
-                bind());
-
-        Model model = new Model();
-        model.setField("Some sensitive value");
-        accessor.setModel(model);
+        ...
     }
 }
 ```
 
-When no restriction is created at all, **Cotton** will automatically assume a binding to be non-threatening, so it will allow full read/write access to it.
+Now comes the fun part, where we use the **_ModelAccessor_** to create restricted bindings.
 
-As soon as at least one restriction is created, this logic is turned around: everything is forbidden if there is not a restriction explicitly allowing it.
+When no restriction is created at all, **Cotton** will automatically assume a binding to be non-threatening, so it will allow full read/write access to it. As soon as at least one restriction is created, this logic is turned around: everything is forbidden if there is not a restriction explicitly allowing it.
 
-In our example we added 2 restrictions:
-- A read/write restriction, granted only to users that have the editor right
-- A read-only restriction, granted to users that have no specific right (which means they just have to be logged in)
+For our example, we want to hide the fields of both of our 2 properties' when no user is logged in. To a user without any right, we want to show that there are fields, but would not want to show their content, because the data is sensitive. Since these are restrictions for all fields we want to bind, we can set them directly on our **_ModelAccessor_**:
 
-As a result, if no user is logged in at all, the binding's access to the property is restricted completely.
+```java
+@Route("demo")
+public class DemoView extends VerticalLayout {
+    
+    ...
 
-The different restriction types are called **_AccessMode_**, where:
+    public DemoView(@Inject ModelAccessor<Model> accessor) {
+        
+        ...
+        
+        accessor.withBaseRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.MASKED));
+        
+        ...
+}
+```
+
+The sensitivity of the 2 of our **_Model_**'s fields are different, so we have to set their restrictions individually. We can do so by setting them in a builder-fashion just when building and binding the fields, by using the _bindAndConfigure()_ methods of our **_ComponentBuilder_**:
+
+```java
+@Route("demo")
+public class DemoView extends VerticalLayout {
+
+    ...    
+
+    public DemoView(@Inject ModelAccessor<Model> accessor) {
+        
+        ...
+
+        add(new HorizontalLayoutBuilder().
+                add(new TextFieldBuilder().
+                        setLabel("Sensitive Field").
+                        bindAndConfigure(accessor, SENSITIVE_PROPERTY).
+                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SUPER_SENSITIVE_DATA)).
+                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SENSITIVE_DATA)).
+                        bind()).
+                add(new TextFieldBuilder().
+                        setLabel("Super Sensitive Field").
+                        bindAndConfigure(accessor, SUPER_SENSITIVE_PROPERTY).
+                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SUPER_SENSITIVE_DATA)).
+                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_ONLY, DemoUser.RIGHT_SENSITIVE_DATA)).
+                        bind()).
+                build());
+    }
+}
+```
+
+The different restriction types we use here are called **_AccessMode_**, where:
 - **_AccessMode_.READ_WRITE** will cause the **_TextField_** to be editable
-- **_AccessMode_.READ_ONLY** will cause the **_TextField_** to be displaying only
-- **_AccessMode_.PROHIBIT** will cause the **_TextField_** to become invisible
+- **_AccessMode_.READ_ONLY** will cause the **_TextField_** to be displaying the property only
+- **_AccessMode_.MASKED** will cause the **_TextField_** to be displaying an empty value only
+- **_AccessMode_.HIDDEN** will cause the **_TextField_** to become invisible
+
+Note that we did not specify a restriction for the scenario of a logged-out-visit, but when an anonymous user is visiting the view, the field will be invisible non the less. This is because **_UserRightBindingAuditor_**'s will default to **_AccessMode_.HIDDEN** when they are not matching, and none of them does when there is no logged in user.
+
+If we for example wanted a non-logged-in user to at least see the fields, we could use a second base binding auditor for anonymous users:
+
+```java
+@Route("demo")
+public class DemoView extends VerticalLayout {
+    
+    ...
+
+    public DemoView(@Inject ModelAccessor<Model> accessor) {
+        
+        ...
+        
+        accessor.withBaseRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.MASKED));
+        accessor.withBaseRestriction(User.UserRightBindingAuditor.forAnonymous(Binding.AccessMode.MASKED));
+        
+        ...
+}
+```
