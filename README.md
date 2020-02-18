@@ -123,3 +123,9 @@ The Epiphy framework enables access to properties that are deep down a model's o
 ### 4.b [MVP-Compliant Data Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/b/mvp_compliant_data_binding)
 
 Cotton's MVP functionality allows applications to be split into view and logic code cleanly; and that goes for the data binding as well, where the model should be controlled elsewhere than it is bound.
+
+### 4.c [Right Dependent Data Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/c/right_dependent_data_binding)
+
+As business applications grow, they often become used by more than one type of user. As soon as there is more than one user group, the need will arise to restrict data access depending on the different groups, often upto field precision.
+
+Cotton allows specifying the access mode per-field in the data binding, effectively preventing data from being modified (or even seen) by users without sufficient rights.
