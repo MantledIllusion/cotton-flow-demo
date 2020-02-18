@@ -129,3 +129,9 @@ Cotton's MVP functionality allows applications to be split into view and logic c
 As business applications grow, they often become used by more than one type of user. As soon as there is more than one user group, the need will arise to restrict data access depending on the different groups, often upto field precision.
 
 Cotton allows specifying the access mode per-field in the data binding, effectively preventing data from being modified (or even seen) by users without sufficient rights.
+
+### 4.d [Numerated Model Binding](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/d/numerated_modeL_binding)
+
+Binding a single field to a single property is trivial; but Epiphy's also allows numerated properties in a model tree, such as listed or mapped ones.
+
+Cotton allows binding properties to **Vaadin**'s **_DataProvider_**, which can be directly used in components such as **_Grid_** or **_RadioButtonGroup_**.
