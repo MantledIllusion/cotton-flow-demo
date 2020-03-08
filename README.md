@@ -135,3 +135,8 @@ Cotton allows specifying the access mode per-field in the data binding, effectiv
 Binding a single field to a single property is trivial; but Epiphy's also allows numerated properties in a model tree, such as listed or mapped ones.
 
 Cotton allows binding properties to **Vaadin**'s **_DataProvider_**, which can be directly used in components such as **_Grid_** or **_RadioButtonGroup_**.
+
+### 4.e [Binding Filtered DataProviders](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/e/binding_filtered_dataproviders)
+
+
+**Cotton**'s **_HasDataProviderBuilder_** allows configuring filterable **Vaadin** **_DataProvider_** instances on the fly for components like **_Grid_**, _CheckBoxGroup_ and **_RadioButtonGroup_**; and in case of **_Grid_** even enables binding filter inpout fields for columns with a simple one-liner.
