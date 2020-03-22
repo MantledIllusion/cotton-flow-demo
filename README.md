@@ -108,6 +108,12 @@ But with a monolith frontend, every API changing service deployment would have t
 
 Since Cotton uses Hura 2, basic plugin functionality is already on board, ready to be used.
 
+### 3.e: [Building a responsive UI](https://github.com/MantledIllusion/cotton-flow-demo/tree/03/e/building_a_responsive_ui)
+
+Building responsive web apps is hard in Vaadin, as the code being on the server is setting up layout and components, but you might want your application to completely change layout when being delivered to different platforms or screen sizes.
+
+Cotton aids for this problem, by enabling developers to provide multiple implementations for the same route and just specifying which implementation able to handle which scenario.
+
 ## Chapter 4: Data Binding
 
 Since Vaadin 8, data binding in the framework has been overhauled to support Java 8's lambdas for a simpler use of Vaadin's Java API.
@@ -137,6 +143,5 @@ Binding a single field to a single property is trivial; but Epiphy's also allows
 Cotton allows binding properties to **Vaadin**'s **_DataProvider_**, which can be directly used in components such as **_Grid_** or **_RadioButtonGroup_**.
 
 ### 4.e [Binding Filtered DataProviders](https://github.com/MantledIllusion/cotton-flow-demo/tree/04/e/binding_filtered_dataproviders)
-
 
 **Cotton**'s **_HasDataProviderBuilder_** allows configuring filterable **Vaadin** **_DataProvider_** instances on the fly for components like **_Grid_**, _CheckBoxGroup_ and **_RadioButtonGroup_**; and in case of **_Grid_** even enables binding filter inpout fields for columns with a simple one-liner.
