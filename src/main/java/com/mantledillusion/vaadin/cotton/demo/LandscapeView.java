@@ -6,7 +6,6 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.Route;
 
-
 @Route("demo")
 @Responsive(@Responsive.Alternative(value = PortraitView.class, mode = Responsive.Alternative.ScreenMode.RATIO,
         fromX = 1, fromY = 1, toX = 1, toY = Integer.MAX_VALUE))

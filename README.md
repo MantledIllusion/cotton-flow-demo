@@ -117,6 +117,11 @@ public class ResponsiveDialogPresenter extends AbstractPresenter<ResponsiveDialo
     private void handleNo(ClickEvent e) {
         this.dialog.close();
     }
+
+    @PostDestroy
+    private void destroy() {
+        this.registration.remove();
+    }
 }
 ```
 
@@ -126,3 +131,10 @@ To enable the dialog to be active, we simply have to inject it into both the **_
 @Inject
 private ResponsiveDialogView responsiveDialogView;
 ```
+
+## Working in Vaadin's _@Push_ Mode
+
+If the view annotated with _@Responsive_  is also annotated with **Vaadin**'s _@Push_ annotation, instead of triggering the resizing mechanism directly, **Cotton** will create an asynchronous threat.
+
+That thread will be awaiting more resize events from the client for a configurable (_**CottonEnvironment**.forResponsiveAdaptionWaitMs())_ amount of time, gathering those events. As soon as no further events are coming in, the normal resize mechanism described above will be triggered.
+
