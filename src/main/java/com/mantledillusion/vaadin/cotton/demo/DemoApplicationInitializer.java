@@ -35,6 +35,6 @@ public class DemoApplicationInitializer implements HuraWebApplicationInitializer
 
     @Define
     public SingletonAllocation defineCache() {
-        return SingletonAllocation.of(DemoMetricsCache.QUALIFIER_CACHE, this.cache);
+        return SingletonAllocation.allocateToInstance(DemoMetricsCache.QUALIFIER_CACHE, this.cache);
     }
 }
