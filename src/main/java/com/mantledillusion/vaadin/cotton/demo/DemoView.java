@@ -9,7 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route("demo")
-@Restricted("right_a")
+@Restricted("(right_a || right_b) && right_c")
 public class DemoView extends Div {
 
     public DemoView() {

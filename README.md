@@ -25,7 +25,7 @@ WebEnv.logOut();
 
 ## Restricting access to a Route
 
-**_Cotton_** offers the **_@Restricted_** annotation that can be used on any **_Component_** that is a direct root navigation target, for example by being annotated with **_@Route_**.
+**_Cotton_** offers the _@Restricted_ annotation that can be used on any **_Component_** that is a direct root navigation target, for example by being annotated with _@Route_.
 
 When a navigation target is annotated with _@Restricted_, **_Cotton_** will automatically check the session's current **_User_** to exist. If there are right identifiers given to the annotation, **_Cotton_** will also check that the **_User_** currently logged in possesses these rights before navigating.
 
@@ -33,7 +33,7 @@ To restrict access to our **_DemoView_**, we simply annotate it:
 
 ````java
 @Route("demo")
-@Restricted("right_a")
+@Restricted("(right_a || right_b) && right_c")
 public class DemoView extends Div {
 
     public DemoView() {
@@ -44,7 +44,9 @@ public class DemoView extends Div {
 }
 ````
 
-When navigating to **_DemoView_** now, there has to be a user in the session that also possesses the right with the identifier "_right_a_".
+When navigating to **_DemoView_** now, there has to be a user in the session that also possesses the right with the identifier "_right_c_", as well as either "_right_a_" or "_right_b_".
+
+The expression in the _@Restricted_ annotation could also be just the id of one right, no right or even a way more complex boolean syntax as used here; it is parsed as a logical **_Expression_**.
 
 **Note that the _@Restricted_ annotation only works on the top level navigation target; it has no effect on any sub views a navigation target might have!**
 
@@ -66,13 +68,7 @@ That view can be any **_Component_** and is expected to call the _**WebEnv**.log
 @Route("login")
 public class DemoLoginView extends VerticalLayout {
 
-    private static final User USER = new User() {
-
-        @Override
-        public boolean hasRights(Set<String> rightIds) {
-            return true;
-        }
-    };
+    private static final User USER = rightIds -> Arrays.asList("right_a", "right_c").containsAll(rightIds);
 
     public DemoLoginView() {
         setSizeFull();
@@ -84,7 +80,7 @@ public class DemoLoginView extends VerticalLayout {
 }
 ````
 
-Note that the User in this example is only a mock that simply mocks owning any right.
+Note that the User in this example is only a mock that simply mocks owning the rights "_right_a_" and "_right_c_", which will be enough for our **_DemoView_**.
 
 Calling _**WebEnv**.login()_ will trigger a **_Page_** reload. Since the login view was only rerouted to, that reload will cause the restricted view to be visited again.
 

@@ -6,18 +6,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-import java.util.Set;
-
+import java.util.Arrays;
 @Route("login")
 public class DemoLoginView extends VerticalLayout {
 
-    private static final User USER = new User() {
-
-        @Override
-        public boolean hasRights(Set<String> rightIds) {
-            return true;
-        }
-    };
+    private static final User USER = rightIds -> Arrays.asList("right_a", "right_c").containsAll(rightIds);
 
     public DemoLoginView() {
         setSizeFull();
