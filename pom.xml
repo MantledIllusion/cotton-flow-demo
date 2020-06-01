@@ -18,12 +18,12 @@
         <dependency>
             <groupId>com.mantledillusion.vaadin</groupId>
             <artifactId>cotton</artifactId>
-            <version>2.0.0.ALPHA17</version>
+            <version>2.0.0.BETA1</version>
         </dependency>
         <dependency>
             <groupId>com.mantledillusion.injection</groupId>
             <artifactId>hura-weblaunch</artifactId>
-            <version>2.0.0.ALPHA8</version>
+            <version>2.0.0.ALPHA10</version>
         </dependency>
 
         <!-- ch.qos.lockback dependencies -->

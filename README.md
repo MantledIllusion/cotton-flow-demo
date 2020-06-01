@@ -109,21 +109,21 @@ public class DemoView extends VerticalLayout {
         
         ...
 
-        add(new HorizontalLayoutBuilder().
-                add(new ButtonBuilder().
-                        setValue("Login Power User").
+        add(HorizontalLayoutBuilder.create().
+                add(ButtonBuilder.create().
+                        setText("Login Power User").
                         addClickListener(e -> WebEnv.logIn(DemoUser.USER_POWER)).
                         build()).
-                add(new ButtonBuilder().
-                        setValue("Login Casual User").
+                add(ButtonBuilder.create().
+                        setText("Login Casual User").
                         addClickListener(e -> WebEnv.logIn(DemoUser.USER_CASUAL)).
                         build()).
-                add(new ButtonBuilder().
-                        setValue("Login Guest User").
+                add(ButtonBuilder.create().
+                        setText("Login Guest User").
                         addClickListener(e -> WebEnv.logIn(DemoUser.USER_GUEST)).
                         build()).
-                add(new ButtonBuilder().
-                        setValue("Logout").
+                add(ButtonBuilder.create().
+                        setText("Logout").
                         addClickListener(e -> WebEnv.logOut()).
                         build()).
                 build());
@@ -149,11 +149,16 @@ public class DemoView extends VerticalLayout {
         
         ...
         
-        accessor.withBaseRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.MASKED));
+        accessor.setAuditMode(Binding.AuditMode.RESTRICTIVE);
+        accessor.setAudit(Binding.AccessMode.MASKED, true);
         
         ...
 }
 ```
+
+Setting the audit mode as **_AuditMode_.RESTRICTIVE** will cause all fields to be fully restricted by default, and we ourselves will allow more access when using _.setAudit()_ individually. The opposite mode, which is **_AuditMode_.GENEROUS** and is also the default, allows full access from which individual restrictions have to be set.
+
+Since we set the **_AccessMode_.MASKED** and demand the user to be logged in for it by providing _true_ to the method, non-logged in users will fall back into **_AuditMode_.RESTRICTIVE**, which will set **_AccessMode_.HIDDEN**. If we would provide _false_, the base **_AccessMode_** for <u>every</u> **_User_** would become **_AccessMode_.MASKED**.
 
 The sensitivity of the 2 of our **_Model_**'s fields are different, so we have to set their restrictions individually. We can do so by setting them in a builder-fashion just when building and binding the fields, by using the _bindAndConfigure()_ methods of our **_ComponentBuilder_**:
 
@@ -167,18 +172,17 @@ public class DemoView extends VerticalLayout {
         
         ...
 
-        add(new HorizontalLayoutBuilder().
-                add(new TextFieldBuilder().
+        add(HorizontalLayoutBuilder.create().
+                add(TextFieldBuilder.create().
                         setLabel("Sensitive Field").
                         bindAndConfigure(accessor, SENSITIVE_PROPERTY).
-                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SUPER_SENSITIVE_DATA)).
-                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SENSITIVE_DATA)).
+                        setAudit(Binding.AccessMode.READ_WRITE, Expression.orOf(DemoUser.RIGHT_SUPER_SENSITIVE_DATA, DemoUser.RIGHT_SENSITIVE_DATA)).
                         bind()).
-                add(new TextFieldBuilder().
+                add(TextFieldBuilder.create().
                         setLabel("Super Sensitive Field").
                         bindAndConfigure(accessor, SUPER_SENSITIVE_PROPERTY).
-                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SUPER_SENSITIVE_DATA)).
-                        withRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.READ_ONLY, DemoUser.RIGHT_SENSITIVE_DATA)).
+                        setAudit(Binding.AccessMode.READ_WRITE, DemoUser.RIGHT_SUPER_SENSITIVE_DATA).
+                        setAudit(Binding.AccessMode.READ_ONLY, DemoUser.RIGHT_SENSITIVE_DATA).
                         bind()).
                 build());
     }
@@ -191,23 +195,6 @@ The different restriction types we use here are called **_AccessMode_**, where:
 - **_AccessMode_.MASKED** will cause the **_TextField_** to be displaying an empty value only
 - **_AccessMode_.HIDDEN** will cause the **_TextField_** to become invisible
 
-Note that we did not specify a restriction for the scenario of a logged-out-visit, but when an anonymous user is visiting the view, the field will be invisible non the less. This is because **_UserRightBindingAuditor_**'s will default to **_AccessMode_.HIDDEN** when they are not matching, and none of them does when there is no logged in user.
+In case of the data with normal sensitivity, we can allow **_AccessMode_.READ_WRITE** to any **_User_** that has the right for it or super sensitivity; we can define any complex right conjunctions using the **_Expression_** syntax.
 
-If we for example wanted a non-logged-in user to at least see the fields, we could use a second base binding auditor for anonymous users:
-
-```java
-@Route("demo")
-public class DemoView extends VerticalLayout {
-    
-    ...
-
-    public DemoView(@Inject ModelAccessor<Model> accessor) {
-        
-        ...
-        
-        accessor.withBaseRestriction(User.UserRightBindingAuditor.forUser(Binding.AccessMode.MASKED));
-        accessor.withBaseRestriction(User.UserRightBindingAuditor.forAnonymous(Binding.AccessMode.MASKED));
-        
-        ...
-}
-```
+In the other case of super sensitive data, we simply create individual audits for the different modes.
