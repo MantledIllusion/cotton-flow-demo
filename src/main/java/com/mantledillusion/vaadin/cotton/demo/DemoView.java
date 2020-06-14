@@ -1,6 +1,6 @@
 package com.mantledillusion.vaadin.cotton.demo;
 
-import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.MetricsTrailSupport;
 import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.metrics.trail.api.MetricType;
 import com.vaadin.flow.component.ClickEvent;
@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class DemoView extends Div {
 
     private static final Consumer<ClickEvent> METRICS_DISPATCHER = event ->
-        VaadinMetricsTrailSupport.getCurrent().commit(new Metric("clickmetric", MetricType.ALERT));
+            MetricsTrailSupport.commit(new Metric("clickmetric", MetricType.ALERT));
 
     public DemoView() {
         Button b = new Button("Create Click Metric");

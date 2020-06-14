@@ -6,14 +6,14 @@ If desired, all dispatched metrics can be consumed and then be used for any purp
 
 ## Committing Metrics
 
-In every **_Cotton_** session the **_VaadinMetricsTrailSupport_** can be used to retrieve the current **_MetricsTrail_**, so metrics an be committed from anywhere; for example, our **_DemoView_**:
+In every **_Cotton_** session the **_MetricsTrailSupport_** can be used to retrieve the current **_MetricsTrail_**, so metrics can be committed from anywhere; for example, our **_DemoView_**:
 
 ````java
 @Route("demo")
 public class DemoView extends Div {
 
     private static final Consumer<ClickEvent> METRICS_DISPATCHER = event ->
-        VaadinMetricsTrailSupport.getCurrent().commit(new Metric("clickmetric", MetricType.ALERT));
+            MetricsTrailSupport.commit(new Metric("clickmetric", MetricType.ALERT));
 
     public DemoView() {
         Button b = new Button("Create Click Metric");
@@ -39,7 +39,7 @@ public class DemoMetricsCache {
     private final Map<UUID, List<Metric>> trailCache = new ConcurrentHashMap<>();
 
     public void add(UUID trailId, Metric metric) {
-        if (GeneralVaadinMetrics.SESSION_END.getMetricId().equals(metric.getIdentifier())) {
+        if (CottonMetrics.SESSION_END.getMetricId().equals(metric.getIdentifier())) {
             this.trailCache.remove(trailId);
         } else {
             this.trailCache.computeIfAbsent(trailId, id -> Collections.synchronizedList(new ArrayList<>())).add(metric);
@@ -47,10 +47,10 @@ public class DemoMetricsCache {
     }
 
     public List<Metric> getSessionMetrics() {
-        if (VaadinMetricsTrailSupport.getCurrent() == null || !this.trailCache.containsKey(VaadinMetricsTrailSupport.getCurrent().getTrailId())) {
+        if (!MetricsTrailSupport.has() || !this.trailCache.containsKey(MetricsTrailSupport.id())) {
             return Collections.emptyList();
         } else {
-            return this.trailCache.get(VaadinMetricsTrailSupport.getCurrent().getTrailId());
+            return this.trailCache.get(MetricsTrailSupport.id());
         }
     }
 }
@@ -100,8 +100,6 @@ public class MetricsView extends Div {
 }
 ````
 
-When accessing the view the grid will display any click metric from the **_DemoView_**, but also:
-- Metrics from the **_GeneralVaadinMetrics_** enum of the **_Vaadin Flow_** **_MetricsTrail_** support, like _general.session.begin_
-- Metrics from the **_CottonMetrics_** enum of **_Cotton_** itself, like _cotton.system.injection_
+When accessing the view the grid will display any click metric from the **_DemoView_**, but also Metrics from the **_CottonMetrics_** enum of **_Cotton_** itself, like _cotton.system.injection_.
 
 These enums contain metrics that record common events like visits, navigations or even errors.

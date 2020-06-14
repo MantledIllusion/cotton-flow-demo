@@ -1,8 +1,8 @@
 package com.mantledillusion.vaadin.cotton.demo;
 
-import com.mantledillusion.metrics.trail.GeneralVaadinMetrics;
-import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.MetricsTrailSupport;
 import com.mantledillusion.metrics.trail.api.Metric;
+import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +14,7 @@ public class DemoMetricsCache {
     private final Map<UUID, List<Metric>> trailCache = new ConcurrentHashMap<>();
 
     public void add(UUID trailId, Metric metric) {
-        if (GeneralVaadinMetrics.SESSION_END.getMetricId().equals(metric.getIdentifier())) {
+        if (CottonMetrics.SESSION_END.getMetricId().equals(metric.getIdentifier())) {
             this.trailCache.remove(trailId);
         } else {
             this.trailCache.computeIfAbsent(trailId, id -> Collections.synchronizedList(new ArrayList<>())).add(metric);
@@ -22,10 +22,10 @@ public class DemoMetricsCache {
     }
 
     public List<Metric> getSessionMetrics() {
-        if (VaadinMetricsTrailSupport.getCurrent() == null || !this.trailCache.containsKey(VaadinMetricsTrailSupport.getCurrent().getTrailId())) {
+        if (!MetricsTrailSupport.has() || !this.trailCache.containsKey(MetricsTrailSupport.id())) {
             return Collections.emptyList();
         } else {
-            return this.trailCache.get(VaadinMetricsTrailSupport.getCurrent().getTrailId());
+            return this.trailCache.get(MetricsTrailSupport.id());
         }
     }
 }
