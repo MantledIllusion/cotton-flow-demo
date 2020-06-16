@@ -10,7 +10,7 @@ In every **_Cotton_** session the **_MetricsTrailSupport_** can be used to retri
 
 ````java
 @Route("demo")
-public class DemoView extends Div {
+public class DemoView extends HorizontalLayout {
 
     private static final Consumer<ClickEvent> METRICS_DISPATCHER = event ->
             MetricsTrailSupport.commit(new Metric("clickmetric", MetricType.ALERT));
@@ -19,11 +19,35 @@ public class DemoView extends Div {
         Button b = new Button("Create Click Metric");
         b.addClickListener(METRICS_DISPATCHER::accept);
         add(b);
+
+        b = new Button("Cause Error");
+        b.addClickListener(event -> {
+            throw new RuntimeException("Boo-Hoo!");
+        });
+        add(b);
+
+        b = new Button("Nav Error");
+        b.addClickListener(event -> WebEnv.navigateTo(FailureView.class));
+        add(b);
     }
 }
 ````
 
-Every button click now generates a new simple **ALERT** **_Metric_** with the identifier "_clickmetric_". It will be delivered to all consumers asynchronously by the **_MetricsTrail_**.
+Every click on the first button now generates a new simple **ALERT** **_Metric_** with the identifier "_clickmetric_". It will be delivered to all consumers asynchronously by the **_MetricsTrail_**.
+
+Every click on the second causes an exception that will be shown in an error dialog, together with the trail ID.
+
+Every click on the third button will cause a navigation to a view that immediately fails, resulting in an error page to be shown. The set up for **_FailingView_** is trivial:
+
+```java
+@Route("failure")
+public class FailureView extends Div {
+
+    public FailureView() {
+        throw new RuntimeException("Error!");
+    }
+}
+```
 
 ## Registering a MetricsConsumer
 
