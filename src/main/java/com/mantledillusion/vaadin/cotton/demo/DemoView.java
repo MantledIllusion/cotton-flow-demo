@@ -24,18 +24,18 @@ public class DemoView extends VerticalLayout {
         setWidthFull();
         setHeightFull();
 
-        Grid<Model> grid = new GridBuilder<Model>().
+        Grid<Model> grid = GridBuilder.create(Model.class).
                 setSizeFull().
-                provide(accessor, ELEMENT).
+                setDataProvider(accessor, ELEMENT).
                 build();
         grid.addColumn(Model::getField);
         add(grid);
 
-        add(new ButtonBuilder().
+        add(ButtonBuilder.create().
                 setText("Add X Element").
                 addClickListener(e -> accessor.include(ELEMENT_LIST, new Model("X"))).
                 build());
-        add(new ButtonBuilder().
+        add(ButtonBuilder.create().
                 setText("Remove Last Element").
                 addClickListener(e -> accessor.strip(ELEMENT_LIST)).
                 build());
